@@ -1,0 +1,27 @@
+{
+  "extends": [
+    "eslint:recommended",
+    "plugin:import/recommended",
+    "plugin:@typescript-eslint/recommended",
+    "eslint-config-prettier"
+  ],
+  "settings": {
+    "import/resolver": {
+      "node": true,
+      "alias": {
+        "map": [
+          ["@", "./src"],
+          ["@assets", "./src/assets"],
+          ["@utils", "./src/utils"],
+          ["@entities", "./src/entities"]
+        ],
+        "extensions": [".js", ".ts"]
+      },
+      "import/extensions": [".js", ".ts"],
+      "importt/parsers": {
+        "@typescript-eslint/parser": [".ts"]
+      }
+    },
+    "rules": {}
+  }
+}
