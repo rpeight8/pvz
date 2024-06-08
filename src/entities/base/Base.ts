@@ -1,5 +1,11 @@
 import generateId from '@utils/idGenerator';
-import type IBase from './IBase';
+
+interface IBase {
+  id: string;
+  name: string;
+  x: number;
+  y: number;
+}
 
 interface BaseProps {
   name: string;
@@ -15,3 +21,4 @@ const createBase = ({ name, x, y }: BaseProps): IBase => ({
 });
 
 export default createBase;
+export type { IBase };

@@ -1,15 +1,19 @@
 interface ITakeDamage {
+  health: number;
   takeDamage: (damage: number) => void;
 }
 
-function takeDamageFeature<T extends ITakeDamage>(entity: T): T {
+function takeDamageFeature<T>({ health, entity }: { health: number; entity: T }): T & ITakeDamage {
   return {
     ...entity,
-    takeDamage: (damage: number) => {
-      console.log(`${entity.name} takes ${damage} damage!`);
-      entity.health -= damage;
+    health,
+    takeDamage(damage: number) {
+      if (this.health) {
+        this.health -= damage;
+      }
     },
   };
 }
 
 export default takeDamageFeature;
+export type { ITakeDamage };
