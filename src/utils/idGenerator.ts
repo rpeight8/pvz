@@ -2,17 +2,17 @@ function* bigIntIdGenerator(
   start: bigint = 0n,
   max: bigint = BigInt(Number.MAX_SAFE_INTEGER),
 ): Generator<bigint, bigint, unknown> {
-  let currentId = start
+  let currentId = start;
   while (true) {
     if (currentId > max) {
-      currentId = start // Reset or handle overflow
+      currentId = start; // Reset or handle overflow
     }
-    yield (currentId += 1n)
+    yield (currentId += 1n);
   }
 }
 
-const generator = bigIntIdGenerator(0n)
+const generator = bigIntIdGenerator(0n);
 
-const generateId = (): bigint => generator.next().value
+const generateId = (): string => generator.next().value.toString();
 
-export default generateId
+export default generateId;
