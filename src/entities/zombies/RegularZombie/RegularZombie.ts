@@ -11,10 +11,20 @@ interface IRegularZombieProps {
   damage: number;
   moveSpeed: number;
   attackSpeed: number;
+  x: number;
+  y: number;
 }
 
-const createRegularZombie = ({ name, health, damage, moveSpeed, attackSpeed }: IRegularZombieProps): IRegularZombie => {
-  const zombie = createZombieBase({ name, health, damage, moveSpeed, attackSpeed });
+const createRegularZombie = ({
+  name,
+  health,
+  damage,
+  moveSpeed,
+  attackSpeed,
+  x,
+  y,
+}: IRegularZombieProps): IRegularZombie => {
+  const zombie = createZombieBase({ name, health, damage, moveSpeed, attackSpeed, x, y });
 
   return zombie;
 };

@@ -1,39 +1,31 @@
 import takeDamageFeature, { ITakeDamage } from '@/features/takeDamage';
 import createBase from '@/entities/base/Base';
 import type { IBase } from '@/entities/base/Base';
-import moveFeature from '@/features/move';
 import attackFeature from '@/features/attack';
 
-interface IZombieBase extends IBase {
+interface IPlantBase extends IBase {
   name: string;
   health: number;
   damage: number;
-  moveSpeed: number;
   attackSpeed: number;
 
   attack: (target: ITakeDamage) => void;
-  move: (x: number, y: number) => void;
   takeDamage: (damage: number) => void;
 }
 
-interface ZombieBaseProps {
+interface PlantBaseProps {
   name: string;
   health: number;
   damage: number;
-  moveSpeed: number;
   attackSpeed: number;
   x: number;
   y: number;
 }
 
-const createZombieBase = ({ name, health, damage, moveSpeed, attackSpeed, x, y }: ZombieBaseProps): IZombieBase => {
+const createPlantBase = ({ name, health, damage, attackSpeed, x, y }: PlantBaseProps): IPlantBase => {
   const base = createBase({ name, x, y });
 
-  const zombie = {
-    ...moveFeature<IBase>({
-      entity: base,
-      moveSpeed,
-    }),
+  const plant = {
     ...takeDamageFeature<IBase>({
       health,
       entity: base,
@@ -45,8 +37,8 @@ const createZombieBase = ({ name, health, damage, moveSpeed, attackSpeed, x, y }
     }),
   };
 
-  return zombie;
+  return plant;
 };
 
-export default createZombieBase;
-export type { IZombieBase };
+export default createPlantBase;
+export type { IPlantBase };
