@@ -25,7 +25,7 @@ interface ZombieProps {
 }
 
 const createZombie = ({ name, health, damage, moveSpeed, attackSpeed }: ZombieProps): IZombie => {
-  const base = createBase({ name, x: 0, y: 0 });
+  const base = createBase({ name, screenX: 0, screenY: 0, gameX: 0, gameY: 0 });
 
   const zombie = {
     ...moveFeature<IBase>({

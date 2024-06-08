@@ -3,21 +3,27 @@ import generateId from '@utils/idGenerator';
 interface IBase {
   id: string;
   name: string;
-  x: number;
-  y: number;
+  screenX: number;
+  screenY: number;
+  gameX: number;
+  gameY: number;
 }
 
 interface BaseProps {
   name: string;
-  x: number;
-  y: number;
+  screenX: number;
+  screenY: number;
+  gameX: number;
+  gameY: number;
 }
 
-const createBase = ({ name, x, y }: BaseProps): IBase => ({
+const createBase = ({ name, screenX, screenY, gameX, gameY }: BaseProps): IBase => ({
   id: generateId(),
   name,
-  x,
-  y,
+  screenX,
+  screenY,
+  gameX,
+  gameY,
 });
 
 export default createBase;

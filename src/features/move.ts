@@ -1,23 +1,17 @@
-interface IMove {
-  x: number;
-  y: number;
+import { IBase } from '@/entities/base/Base';
+
+interface IMove extends IBase {
   moveSpeed: number;
-  move: (x: number, y: number) => void;
+  move: (moveSpeed: number) => void;
 }
 
-function moveFeature<T extends { x: number; y: number }>({
-  entity,
-  moveSpeed,
-}: {
-  entity: T;
-  moveSpeed: number;
-}): T & IMove {
+function moveFeature<T extends IBase>({ entity, moveSpeed }: { entity: T; moveSpeed: number }): T & IMove {
   return {
     ...entity,
     moveSpeed,
-    move(x: number, y: number) {
-      this.x = x;
-      this.y = y;
+    move(moveSpeed: number) {
+      console.log('Moving at speed:', moveSpeed);
+      throw new Error('Not implemented');
     },
   };
 }
