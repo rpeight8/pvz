@@ -4,7 +4,7 @@ import type { IBase } from '@/entities/base/Base';
 import moveFeature from '@/features/move';
 import attackFeature from '@/features/attack';
 
-interface IZombie extends IBase {
+interface IZombieBase extends IBase {
   name: string;
   health: number;
   damage: number;
@@ -16,7 +16,7 @@ interface IZombie extends IBase {
   takeDamage: (damage: number) => void;
 }
 
-interface ZombieProps {
+interface ZombieBaseProps {
   name: string;
   health: number;
   damage: number;
@@ -24,7 +24,7 @@ interface ZombieProps {
   attackSpeed: number;
 }
 
-const createZombie = ({ name, health, damage, moveSpeed, attackSpeed }: ZombieProps): IZombie => {
+const createZombieBase = ({ name, health, damage, moveSpeed, attackSpeed }: ZombieBaseProps): IZombieBase => {
   const base = createBase({ name, screenX: 0, screenY: 0, gameX: 0, gameY: 0 });
 
   const zombie = {
@@ -46,5 +46,5 @@ const createZombie = ({ name, health, damage, moveSpeed, attackSpeed }: ZombiePr
   return zombie;
 };
 
-export default createZombie;
-export type { IZombie };
+export default createZombieBase;
+export type { IZombieBase };

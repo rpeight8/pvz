@@ -1,7 +1,7 @@
-import type { IZombie } from '@/entities/zombies/Zombie/Zombie';
+import type { IZombieBase } from '@/entities/zombies/ZombieBase/ZombieBase';
 
 interface ICell {
-  zombies: IZombie[];
+  zombies: IZombieBase[];
   plants: unknown[];
   projectiles: unknown[];
   screenX: number;

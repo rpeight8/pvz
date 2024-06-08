@@ -1,7 +1,7 @@
-import type { IZombie } from '@/entities/zombies/Zombie/Zombie';
-import createZombie from '@/entities/zombies/Zombie/Zombie';
+import type { IZombieBase } from '@/entities/zombies/ZombieBase/ZombieBase';
+import createZombieBase from '@/entities/zombies/ZombieBase/ZombieBase';
 
-interface IRegularZombie extends IZombie {
+interface IRegularZombie extends IZombieBase {
   // no additional properties
 }
 
@@ -14,7 +14,7 @@ interface IRegularZombieProps {
 }
 
 const createRegularZombie = ({ name, health, damage, moveSpeed, attackSpeed }: IRegularZombieProps): IRegularZombie => {
-  const zombie = createZombie({ name, health, damage, moveSpeed, attackSpeed });
+  const zombie = createZombieBase({ name, health, damage, moveSpeed, attackSpeed });
 
   return zombie;
 };
