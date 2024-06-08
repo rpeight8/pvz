@@ -6,8 +6,8 @@ interface ICell {
   projectiles: unknown[];
   screenX: number;
   screenY: number;
-  gameX: number;
-  gameY: number;
+  x: number;
+  y: number;
   gameWidth: number;
   gameHeight: number;
   screenWidth: number;
@@ -47,8 +47,8 @@ const createGrid = ({ rows, columns, screenHeight, screenWidth, gameHeight, game
         projectiles: [],
         screenX: iC * cellScreenWidth,
         screenY: iR * cellScreenHeight,
-        gameX: iC * cellGameWidth,
-        gameY: iR * cellgameHeight,
+        x: iC * cellGameWidth,
+        y: iR * cellgameHeight,
         gameWidth: cellGameWidth,
         gameHeight: cellgameHeight,
         screenWidth: cellScreenWidth,

@@ -1,17 +1,29 @@
-import { Application, Sprite, Assets } from 'pixi.js';
+import { Application, Sprite, Assets, Ticker } from 'pixi.js';
 import createGrid from './grid/Grid';
 
 import './style.css';
 
 const app = new Application();
 
-await app.init({ width: 800, height: 600 });
+async function setup() {
+  await app.init({ width: 800, height: 600 });
+  document.body.appendChild(app.canvas);
+}
 
-document.body.appendChild(app.canvas);
+async function preload() {
+  const assets = [
+    {
+      alias: 'peashooter',
+      src: './src/assets/Peashooter.png',
+    },
+    {
+      alias: 'regularZombie',
+      src: './src/assets/RegularZombie.png',
+    },
+  ];
 
-await Assets.load('./src/assets/Peashooter.png');
-
-const peashooter = new Sprite(Assets.get('./src/assets/Peashooter.png'));
+  await Assets.load(assets);
+}
 
 const grid = createGrid({
   rows: 3,
@@ -23,4 +35,23 @@ const grid = createGrid({
 });
 console.log(grid);
 
-app.stage.addChild(peashooter);
+(async () => {
+  await preload();
+  await setup();
+
+  const peashooterSprite = new Sprite(Assets.get('peashooter'));
+  const regularZombieSprite = new Sprite(Assets.get('regularZombie'));
+
+  regularZombieSprite.x = 200;
+  regularZombieSprite.y = 100;
+
+  peashooterSprite.x = 100;
+  peashooterSprite.y = 100;
+
+  app.stage.addChild(peashooterSprite);
+  app.stage.addChild(regularZombieSprite);
+
+  app.ticker.add(() => {
+    regularZombieSprite.x -= 1;
+  });
+})();
