@@ -1,24 +1,52 @@
 import generateId from '@utils/idGenerator';
 
-interface IBase {
+type Base = {
   id: string;
   name: string;
   x: number;
   y: number;
-}
+  getX: () => number;
+  getY: () => number;
+  setY: (y: number) => void;
+  setX: (x: number) => void;
+  getId: () => string;
+  getName: () => string;
+};
 
-interface BaseProps {
+type BaseProps = {
   name: string;
   x: number;
   y: number;
-}
+};
 
-const createBase = ({ name, x, y }: BaseProps): IBase => ({
-  id: generateId(),
-  name,
-  x,
-  y,
-});
+const createBase = ({ name, x, y }: BaseProps): Base => {
+  const base = {
+    id: generateId(),
+    name,
+    x,
+    y,
+    getX: function () {
+      return this.x;
+    },
+    getY: function () {
+      return this.y;
+    },
+    setY: function (y: number) {
+      this.y = y;
+    },
+    setX: function (x: number) {
+      this.x = x;
+    },
+    getId: function () {
+      return this.id;
+    },
+    getName: function () {
+      return this.name;
+    },
+  };
 
-export default createBase;
-export type { IBase };
+  return base;
+};
+
+export { createBase };
+export type { Base, BaseProps };

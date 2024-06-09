@@ -1,10 +1,13 @@
-import { ITakeDamage } from './takeDamage';
+type Damageable = {
+  health: number;
+  takeDamage: (damage: number) => void;
+};
 
-interface IAttack {
+type Attackable = {
   damage: number;
   attackSpeed: number;
-  attack: (target: ITakeDamage) => void;
-}
+  attack: (target: Damageable) => void;
+};
 
 function attackFeature<T>({
   entity,
@@ -14,12 +17,12 @@ function attackFeature<T>({
   entity: T;
   damage: number;
   attackSpeed: number;
-}): T & IAttack {
+}): T & Attackable {
   return {
     ...entity,
     damage,
     attackSpeed,
-    attack(target: ITakeDamage) {
+    attack(target: Damageable) {
       target.takeDamage(this.damage);
     },
   };

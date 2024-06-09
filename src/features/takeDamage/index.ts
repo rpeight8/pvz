@@ -1,9 +1,9 @@
-interface ITakeDamage {
+type Damageable = {
   health: number;
   takeDamage: (damage: number) => void;
-}
+};
 
-function takeDamageFeature<T>({ health, entity }: { health: number; entity: T }): T & ITakeDamage {
+function takeDamageFeature<T>({ health, entity }: { health: number; entity: T }): T & Damageable {
   return {
     ...entity,
     health,
@@ -16,4 +16,4 @@ function takeDamageFeature<T>({ health, entity }: { health: number; entity: T })
 }
 
 export default takeDamageFeature;
-export type { ITakeDamage };
+export type { Damageable };

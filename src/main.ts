@@ -1,6 +1,6 @@
-import { Application, Sprite, Assets, Ticker } from 'pixi.js';
+import { Application, Sprite, Assets } from 'pixi.js';
 import createGrid from './grid/Grid';
-
+import { performLoop } from './loop';
 import './style.css';
 
 const app = new Application();
@@ -24,6 +24,10 @@ async function preload() {
 
   await Assets.load(assets);
 }
+
+function createLevel = () => {
+  
+};
 
 const grid = createGrid({
   rows: 3,

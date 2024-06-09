@@ -1,56 +1,92 @@
-import type { IZombieBase } from '@/entities/zombies/ZombieBase/ZombieBase';
-
-interface ICell {
-  zombies: IZombieBase[];
-  plants: unknown[];
-  projectiles: unknown[];
-  screenX: number;
-  screenY: number;
-  x: number;
-  y: number;
+type Cell<Z, P, PR> = {
+  zombies: Z[];
+  plants: P[];
+  projectiles: PR[];
   gameWidth: number;
   gameHeight: number;
   screenWidth: number;
   screenHeight: number;
-}
+};
 
-interface IGrid {
+type Row<C> = C[];
+
+type Grid<Z, P, PR> = {
   rows: number;
   columns: number;
-  grid: ICell[][];
+  grid: Row<Cell<Z, P, PR>>[];
   screenHeight: number;
   screenWidth: number;
   gameHeight: number;
   gameWidth: number;
-}
+  getCellByGameCoordinates: (x: number, y: number) => Cell<Z, P, PR>;
+  getCellByScreenCoordinates: (x: number, y: number) => Cell<Z, P, PR>;
+  screenPositionToGamePosition: (x: number, y: number) => [number, number];
+  gamePositionToScreenPosition: (x: number, y: number) => [number, number];
+  heightRatio: number;
+  widthRatio: number;
+};
 
-interface CreateGridProps {
+type CreateGridProps = {
   rows: number;
   columns: number;
   screenHeight: number;
   screenWidth: number;
   gameHeight: number;
   gameWidth: number;
+};
+
+function getCellByGameCoordinates<Z, P, PR>(this: Grid<Z, P, PR>, x: number, y: number): Cell<Z, P, PR> {
+  const col = Math.floor(x / (this.gameWidth / this.columns));
+  const row = Math.floor(y / (this.gameHeight / this.rows));
+
+  return this.grid[row][col];
 }
 
-const createGrid = ({ rows, columns, screenHeight, screenWidth, gameHeight, gameWidth }: CreateGridProps): IGrid => {
+function getCellByScreenCoordinates<Z, P, PR>(this: Grid<Z, P, PR>, x: number, y: number): Cell<Z, P, PR> {
+  const col = Math.floor(x / (this.screenWidth / this.columns));
+  const row = Math.floor(y / (this.screenHeight / this.rows));
+
+  return this.grid[row][col];
+}
+
+function screenPositionToGamePosition<Z, P, PR>(this: Grid<Z, P, PR>, x: number, y: number): [number, number] {
+  const gameX = x / this.widthRatio;
+  const gameY = y / this.heightRatio;
+
+  return [gameX, gameY];
+}
+
+function gamePositionToScreenPosition<Z, P, PR>(this: Grid<Z, P, PR>, x: number, y: number): [number, number] {
+  const screenX = x * this.widthRatio;
+  const screenY = y * this.heightRatio;
+
+  return [screenX, screenY];
+}
+
+const createGrid = <Z, P, PR>({
+  rows,
+  columns,
+  screenHeight,
+  screenWidth,
+  gameHeight,
+  gameWidth,
+}: CreateGridProps): Grid<Z, P, PR> => {
   const cellScreenWidth = Math.floor(screenWidth / columns);
   const cellScreenHeight = Math.floor(screenHeight / rows);
   const cellGameWidth = Math.floor(gameWidth / columns);
-  const cellgameHeight = Math.floor(gameHeight / rows);
+  const cellGameHeight = Math.floor(gameHeight / rows);
 
-  const grid = Array.from({ length: rows }, (_, iR) =>
-    Array.from({ length: columns }, (_, iC) => {
+  const widthRation = screenWidth / gameWidth;
+  const heightRation = screenHeight / gameHeight;
+
+  const grid = Array.from({ length: rows }, () =>
+    Array.from({ length: columns }, (): Cell<Z, P, PR> => {
       return {
         zombies: [],
         plants: [],
         projectiles: [],
-        screenX: iC * cellScreenWidth,
-        screenY: iR * cellScreenHeight,
-        x: iC * cellGameWidth,
-        y: iR * cellgameHeight,
         gameWidth: cellGameWidth,
-        gameHeight: cellgameHeight,
+        gameHeight: cellGameHeight,
         screenWidth: cellScreenWidth,
         screenHeight: cellScreenHeight,
       };
@@ -65,7 +101,14 @@ const createGrid = ({ rows, columns, screenHeight, screenWidth, gameHeight, game
     gameHeight,
     gameWidth,
     grid,
+    heightRatio: heightRation,
+    widthRatio: widthRation,
+    getCellByGameCoordinates,
+    getCellByScreenCoordinates,
+    screenPositionToGamePosition,
+    gamePositionToScreenPosition,
   };
 };
 
-export default createGrid;
+export { createGrid };
+export type { Grid, Cell, CreateGridProps };
