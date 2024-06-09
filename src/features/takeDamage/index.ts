@@ -1,16 +1,21 @@
 type Damageable = {
-  health: number;
   takeDamage: (damage: number) => void;
+  getHealth: () => number;
+  setHealth: (health: number) => void;
 };
 
-function takeDamageFeature<T>({ health, entity }: { health: number; entity: T }): T & Damageable {
+function takeDamageFeature({ health }: { health: number }): Damageable {
   return {
-    ...entity,
-    health,
     takeDamage(damage: number) {
-      if (this.health) {
-        this.health -= damage;
+      if (health) {
+        health -= damage;
       }
+    },
+    getHealth() {
+      return health;
+    },
+    setHealth(newHealth: number) {
+      health = newHealth;
     },
   };
 }

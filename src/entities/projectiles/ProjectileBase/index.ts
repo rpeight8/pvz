@@ -3,8 +3,6 @@ import { createBase } from '@/entities/base/Base';
 import moveFeature from '@/features/move';
 
 type ProjectileBase = Base & {
-  damage: number;
-  moveSpeed: number;
   move: () => void;
 };
 

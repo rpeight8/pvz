@@ -1,48 +1,44 @@
 import type { ProjectileBase } from '@/entities/projectiles/ProjectileBase';
 
-type Base = {
-  getX: () => number;
-  getY: () => number;
-};
-
 type ProjectileBuilder<PR extends ProjectileBase> = ({ damage, x, y }: { damage: number; x: number; y: number }) => PR;
 
-type Shootable<PR extends ProjectileBase> = Base & {
+type Shootable<PR extends ProjectileBase> = {
   shoot: () => PR;
-  shootRate: number;
-  shootDamage: number;
   projectileBuilder: ProjectileBuilder<PR>;
   getProjectile: () => ProjectileBuilder<PR>;
   setProjectile: (projectileBuilder: ProjectileBuilder<PR>) => void;
   getShootRate: () => number;
   setShootRate: (rate: number) => void;
+  getShootX: () => number;
+  getShootY: () => number;
 };
 
-type ShootableProps<T, PR extends ProjectileBase> = {
+type ShootableProps<PR extends ProjectileBase> = {
   projectileBuilder: ProjectileBuilder<PR>;
   shootRate: number;
   shootDamage: number;
-  entity: T;
+  getShootX: () => number;
+  getShootY: () => number;
 };
 
-const shootFeature = <T extends Base, PR extends ProjectileBase>({
+const shootFeature = <PR extends ProjectileBase>({
   projectileBuilder,
+  getShootX,
+  getShootY,
   shootRate,
   shootDamage,
-  entity,
-}: ShootableProps<T, PR>): Shootable<PR> => {
+}: ShootableProps<PR>): Shootable<PR> => {
   const shootable: Shootable<PR> = {
-    ...entity,
     projectileBuilder,
-    shootRate,
-    shootDamage,
     shoot: function () {
       return this.projectileBuilder({
-        damage: this.shootDamage,
-        x: this.getX(),
-        y: this.getY(),
+        damage: shootDamage,
+        x: this.getShootX(),
+        y: this.getShootY(),
       });
     },
+    getShootX,
+    getShootY,
     getProjectile: function () {
       return this.projectileBuilder;
     },
@@ -50,10 +46,10 @@ const shootFeature = <T extends Base, PR extends ProjectileBase>({
       this.projectileBuilder = projectile;
     },
     getShootRate: function () {
-      return this.shootRate;
+      return shootRate;
     },
     setShootRate: function (rate: number) {
-      this.shootRate = rate;
+      shootRate = rate;
     },
   };
 

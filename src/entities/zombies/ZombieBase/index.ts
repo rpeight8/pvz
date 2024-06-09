@@ -1,8 +1,6 @@
 import takeDamageFeature from '@/features/takeDamage';
-import type { Damageable } from '@/features/takeDamage';
 import { createBase } from '@/entities/base/Base';
 import type { BaseProps } from '@/entities/base/Base';
-import attackFeature from '@/features/attack';
 
 type Base = {
   getId: () => string;
@@ -14,32 +12,21 @@ type Base = {
 };
 
 type ZombieBase = Base & {
-  health: number;
-  damage: number;
-  attackSpeed: number;
-
-  attack: (target: Damageable) => void;
   takeDamage: (damage: number) => void;
 };
 
 type ZombieBaseProps = BaseProps & {
   health: number;
-  damage: number;
-  attackSpeed: number;
+  name: string;
+  x: number;
+  y: number;
 };
 
-const createZombieBase = ({ name, health, damage, attackSpeed, x, y }: ZombieBaseProps): ZombieBase => {
-  const base = createBase({ name, x, y });
-
+const createZombieBase = ({ name, health, x, y }: ZombieBaseProps): ZombieBase => {
   const zombie = {
-    ...takeDamageFeature<Base>({
+    ...createBase({ name, x, y }),
+    ...takeDamageFeature({
       health,
-      entity: base,
-    }),
-    ...attackFeature<Base>({
-      damage,
-      attackSpeed,
-      entity: base,
     }),
   };
 

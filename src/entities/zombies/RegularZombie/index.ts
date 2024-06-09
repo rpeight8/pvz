@@ -1,34 +1,42 @@
 import type { ZombieBase, ZombieBaseProps } from '@/entities/zombies/ZombieBase';
 import createZombieBase from '@/entities/zombies/ZombieBase';
+import attackFeature from '@/features/attack';
 import moveFeature from '@/features/move';
 
 type RegularZombie = ZombieBase & {
-  moveSpeed: number;
   move: (moveSpeed: number) => void;
 };
 
 type RegularZombieProps = ZombieBaseProps & {
   moveSpeed: number;
+  damage: number;
+  attackSpeed: number;
 };
 
 const createRegularZombie = ({
-  name,
-  health,
-  damage,
   moveSpeed,
-  attackSpeed,
   x,
   y,
+  name,
+  health,
+  attackSpeed,
+  damage,
 }: RegularZombieProps): RegularZombie => {
-  const zombie = createZombieBase({ name, health, damage, attackSpeed, x, y });
+  const baseZombie = createZombieBase({ name, health, x, y });
 
-  const regularZombie = {
-    ...moveFeature<typeof zombie>({
-      entity: zombie,
+  const regularZombie: RegularZombie = {
+    ...baseZombie,
+    ...moveFeature({
       moveSpeed,
+      getX: baseZombie.getX,
+      setX: baseZombie.setX,
+    }),
+
+    ...attackFeature({
+      damage,
+      attackSpeed,
     }),
   };
-
   return regularZombie;
 };
 

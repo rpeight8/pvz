@@ -1,32 +1,41 @@
-type Base = {
-  getX: () => number;
-  getY: () => number;
-  setX: (x: number) => void;
-  setY: (y: number) => void;
-};
-
-type Moveable = Base & {
-  moveSpeed: number;
+type Moveable = {
   move: () => void;
-  getSpeed: () => number;
-  setSpeed: (speed: number) => void;
+  getMoveSpeed: () => number;
+  setMoveSpeed: (speed: number) => void;
+  getNextTickX: () => number;
+  getMoveX: () => number;
+  setMoveX: (x: number) => void;
 };
 
-function moveFeature<T extends Base>({ entity, moveSpeed }: { entity: T; moveSpeed: number }): T & Moveable {
-  return {
-    ...entity,
-    moveSpeed,
+type MoveableProps = {
+  moveSpeed: number;
+  getX: () => number;
+  setX: (x: number) => void;
+};
+
+function moveFeature({ moveSpeed, getX, setX }: MoveableProps): Moveable {
+  const moveable: Moveable = {
     move() {
-      this.setX(this.getX() + this.moveSpeed);
-      // this.y += moveSpeed;
+      this.setMoveX(this.getNextTickX());
     },
-    getSpeed() {
-      return this.moveSpeed;
+    getMoveSpeed() {
+      return moveSpeed;
     },
-    setSpeed(speed: number) {
-      this.moveSpeed = speed;
+    setMoveSpeed(speed: number) {
+      moveSpeed = speed;
+    },
+    getMoveX() {
+      return getX();
+    },
+    setMoveX(x: number) {
+      setX(x);
+    },
+    getNextTickX() {
+      return this.getMoveX() + moveSpeed;
     },
   };
+
+  return moveable;
 }
 
 export default moveFeature;
