@@ -2,7 +2,8 @@ import type { ProjectileBase } from '../ProjectileBase';
 import createProjectileBase from '../ProjectileBase';
 
 type PeaProjectile = ProjectileBase & {
-  // no additional properties
+  getDamage: () => number;
+  setDamage: (damage: number) => void;
 };
 
 type PeaProjectileProps = {
@@ -12,9 +13,16 @@ type PeaProjectileProps = {
 };
 
 const createPeaProjectile = ({ damage, x, y }: PeaProjectileProps): PeaProjectile => {
-  const projectile = createProjectileBase({ damage, moveSpeed: 60, x, y, name: 'pea' });
+  const baseProjectile = createProjectileBase({ damage, moveSpeed: 60, x, y, name: 'pea' });
 
-  return projectile;
+  const peaProjectile: PeaProjectile = {
+    ...baseProjectile,
+    getDamage: () => damage,
+    setDamage: (newDamage: number) => {
+      damage = newDamage;
+    },
+  };
+  return peaProjectile;
 };
 
 export default createPeaProjectile;

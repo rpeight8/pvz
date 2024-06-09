@@ -13,6 +13,8 @@ type Base = {
 
 type ZombieBase = Base & {
   takeDamage: (damage: number) => void;
+  getHealth: () => number;
+  setHealth: (health: number) => void;
 };
 
 type ZombieBaseProps = BaseProps & {

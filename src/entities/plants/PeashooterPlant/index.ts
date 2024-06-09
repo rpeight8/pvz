@@ -1,6 +1,6 @@
 import type { PlantBase, PlantBaseProps } from '@/entities/plants/PlantBase';
 import createPlantBase from '@/entities/plants/PlantBase';
-import createPeaProjectilefrom from '@/entities/projectiles/PeaProjectile';
+import createPeaProjectile from '@/entities/projectiles/PeaProjectile';
 import type { PeaProjectile } from '@/entities/projectiles/PeaProjectile';
 import type { ProjectileBase } from '@/entities/projectiles/ProjectileBase';
 import shootFeature from '@/features/shoot';
@@ -32,7 +32,7 @@ const createPeashooterPlant = ({ name, health, shootDamage, shootRate, x, y }: P
       shootDamage,
       getShootX: plant.getX,
       getShootY: plant.getY,
-      projectileBuilder: createPeaProjectilefrom,
+      projectileBuilder: createPeaProjectile,
     }),
   };
 

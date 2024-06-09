@@ -1,9 +1,11 @@
-import type { Base, BaseProps } from '@/entities/base/Base';
 import { createBase } from '@/entities/base/Base';
+import type { Base, BaseProps } from '@/entities/base/Base';
 import moveFeature from '@/features/move';
 
 type ProjectileBase = Base & {
   move: () => void;
+  getMoveSpeed: () => number;
+  getNextTickX: () => number;
 };
 
 type ProjectileBaseProps = BaseProps & {
@@ -11,12 +13,13 @@ type ProjectileBaseProps = BaseProps & {
   moveSpeed: number;
 };
 
-const createProjectileBase = ({ damage, moveSpeed, x, y }: ProjectileBaseProps): ProjectileBase => {
-  const base = createBase({ name: 'projectile', x, y });
+const createProjectileBase = ({ moveSpeed, x, y, name }: ProjectileBaseProps): ProjectileBase => {
+  const base = createBase({ name, x, y });
   const projectile = {
-    damage,
-    ...moveFeature<Base>({
-      entity: base,
+    ...base,
+    ...moveFeature({
+      getX: base.getX,
+      setX: base.setX,
       moveSpeed,
     }),
   };

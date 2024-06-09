@@ -2,9 +2,15 @@ import type { ZombieBase, ZombieBaseProps } from '@/entities/zombies/ZombieBase'
 import createZombieBase from '@/entities/zombies/ZombieBase';
 import attackFeature from '@/features/attack';
 import moveFeature from '@/features/move';
+import { Damageable } from '@/features/takeDamage';
 
 type RegularZombie = ZombieBase & {
-  move: (moveSpeed: number) => void;
+  move: () => void;
+  getMoveSpeed: () => number;
+  attack: (target: Damageable) => void;
+  getDamage: () => number;
+  getAttackSpeed: () => number;
+  getNextTickX: () => number;
 };
 
 type RegularZombieProps = ZombieBaseProps & {

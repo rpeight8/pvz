@@ -11,15 +11,17 @@ type Cell<Z, P, PR> = {
 type Row<C> = C[];
 
 type Grid<Z, P, PR> = {
-  rows: number;
-  columns: number;
-  grid: Row<Cell<Z, P, PR>>[];
+  rows: Row<Cell<Z, P, PR>>[];
+  rowsNumber: number;
+  columnsNumber: number;
   screenHeight: number;
   screenWidth: number;
   gameHeight: number;
   gameWidth: number;
   getCellByGameCoordinates: (x: number, y: number) => Cell<Z, P, PR>;
   getCellByScreenCoordinates: (x: number, y: number) => Cell<Z, P, PR>;
+  getRowByGameCoordinates: (y: number) => Row<Cell<Z, P, PR>>;
+  getRowByScreenCoordinates: (y: number) => Row<Cell<Z, P, PR>>;
   screenPositionToGamePosition: (x: number, y: number) => [number, number];
   gamePositionToScreenPosition: (x: number, y: number) => [number, number];
   heightRatio: number;
@@ -27,8 +29,8 @@ type Grid<Z, P, PR> = {
 };
 
 type CreateGridProps = {
-  rows: number;
-  columns: number;
+  rowsNumber: number;
+  columnsNumber: number;
   screenHeight: number;
   screenWidth: number;
   gameHeight: number;
@@ -36,17 +38,29 @@ type CreateGridProps = {
 };
 
 function getCellByGameCoordinates<Z, P, PR>(this: Grid<Z, P, PR>, x: number, y: number): Cell<Z, P, PR> {
-  const col = Math.floor(x / (this.gameWidth / this.columns));
-  const row = Math.floor(y / (this.gameHeight / this.rows));
+  const col = Math.floor(x / (this.gameWidth / this.columnsNumber));
+  const row = Math.floor(y / (this.gameHeight / this.rowsNumber));
 
-  return this.grid[row][col];
+  return this.rows[row][col];
 }
 
 function getCellByScreenCoordinates<Z, P, PR>(this: Grid<Z, P, PR>, x: number, y: number): Cell<Z, P, PR> {
-  const col = Math.floor(x / (this.screenWidth / this.columns));
-  const row = Math.floor(y / (this.screenHeight / this.rows));
+  const col = Math.floor(x / (this.screenWidth / this.columnsNumber));
+  const row = Math.floor(y / (this.screenHeight / this.rowsNumber));
 
-  return this.grid[row][col];
+  return this.rows[row][col];
+}
+
+function getRowByGameCoordinates<Z, P, PR>(this: Grid<Z, P, PR>, y: number): Row<Cell<Z, P, PR>> {
+  const row = Math.floor(y / (this.gameHeight / this.rowsNumber));
+
+  return this.rows[row];
+}
+
+function getRowByScreenCoordinates<Z, P, PR>(this: Grid<Z, P, PR>, y: number): Row<Cell<Z, P, PR>> {
+  const row = Math.floor(y / (this.screenHeight / this.rowsNumber));
+
+  return this.rows[row];
 }
 
 function screenPositionToGamePosition<Z, P, PR>(this: Grid<Z, P, PR>, x: number, y: number): [number, number] {
@@ -64,23 +78,23 @@ function gamePositionToScreenPosition<Z, P, PR>(this: Grid<Z, P, PR>, x: number,
 }
 
 const createGrid = <Z, P, PR>({
-  rows,
-  columns,
+  rowsNumber,
+  columnsNumber,
   screenHeight,
   screenWidth,
   gameHeight,
   gameWidth,
 }: CreateGridProps): Grid<Z, P, PR> => {
-  const cellScreenWidth = Math.floor(screenWidth / columns);
-  const cellScreenHeight = Math.floor(screenHeight / rows);
-  const cellGameWidth = Math.floor(gameWidth / columns);
-  const cellGameHeight = Math.floor(gameHeight / rows);
+  const cellScreenWidth = Math.floor(screenWidth / columnsNumber);
+  const cellScreenHeight = Math.floor(screenHeight / rowsNumber);
+  const cellGameWidth = Math.floor(gameWidth / columnsNumber);
+  const cellGameHeight = Math.floor(gameHeight / rowsNumber);
 
   const widthRation = screenWidth / gameWidth;
   const heightRation = screenHeight / gameHeight;
 
-  const grid = Array.from({ length: rows }, () =>
-    Array.from({ length: columns }, (): Cell<Z, P, PR> => {
+  const rows = Array.from({ length: rowsNumber }, () =>
+    Array.from({ length: columnsNumber }, (): Cell<Z, P, PR> => {
       return {
         zombies: [],
         plants: [],
@@ -95,16 +109,18 @@ const createGrid = <Z, P, PR>({
 
   return {
     rows,
-    columns,
+    rowsNumber,
+    columnsNumber,
     screenHeight,
     screenWidth,
     gameHeight,
     gameWidth,
-    grid,
     heightRatio: heightRation,
     widthRatio: widthRation,
     getCellByGameCoordinates,
     getCellByScreenCoordinates,
+    getRowByGameCoordinates,
+    getRowByScreenCoordinates,
     screenPositionToGamePosition,
     gamePositionToScreenPosition,
   };

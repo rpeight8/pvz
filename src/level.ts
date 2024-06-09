@@ -7,47 +7,45 @@ type Cell<Z extends ZombieEntity, P extends PlantEntity, PR extends ProjectileEn
 type Row<C> = C[];
 
 type Grid<Z extends ZombieEntity, P extends PlantEntity, PR extends ProjectileEntity> = {
-  cells: Cell<Z, P, PR>[][];
+  rows: Row<Cell<Z, P, PR>>[];
   getCellByGameCoordinates: (x: number, y: number) => Cell<Z, P, PR>;
   getCellByScreenCoordinates: (x: number, y: number) => Cell<Z, P, PR>;
   getRowByGameCoordinates: (y: number) => Row<Cell<Z, P, PR>>;
   getRowByScreenCoordinates: (y: number) => Row<Cell<Z, P, PR>>;
 };
 
-type BaseEntity =
-  | {
-      getId: () => string;
-      getName: () => string;
-      getX: () => number;
-      getY: () => number;
-    }
-  | {
-      getId: () => string;
-      getName: () => string;
-      getX: () => number;
-      getY: () => number;
-      move: () => void;
-      getSpeed: () => number;
-    };
+type BaseEntity = {
+  getId: () => string;
+  getName: () => string;
+  getX: () => number;
+  getY: () => number;
+};
 
 type ZombieEntity = BaseEntity & {
-  health: number;
-  damage: number;
-  attackSpeed: number;
   attack: (target: PlantEntity) => void;
   takeDamage: (damage: number) => void;
+  move: () => void;
+  getMoveSpeed: () => number;
+  getHealth: () => number;
+  setHealth: (health: number) => void;
+  getAttackSpeed: () => number;
+  getDamage: () => number;
+  getNextTickX: () => number;
 };
 
 type PlantEntity = BaseEntity & {
-  health: number;
-  damage: number;
-  attackSpeed: number;
-  attack: (target: ZombieEntity) => void;
+  attack?: (target: ZombieEntity) => void;
   takeDamage: (damage: number) => void;
+  getHealth: () => number;
+  setHealth: (health: number) => void;
+  getShootRate: () => number;
 };
 
 type ProjectileEntity = BaseEntity & {
-  damage: number;
+  move: () => void;
+  getMoveSpeed: () => number;
+  getDamage: () => number;
+  getNextTickX: () => number;
 };
 
 type Entities<Z extends ZombieEntity, P extends PlantEntity, PR extends ProjectileEntity> = {
@@ -66,8 +64,6 @@ type Level<Z extends ZombieEntity, P extends PlantEntity, PR extends ProjectileE
   removeZombie: (this: Level<Z, P, PR>, zombie: Z) => void;
   removePlant: (this: Level<Z, P, PR>, plant: P) => void;
   removeProjectile: (this: Level<Z, P, PR>, projectile: PR) => void;
-  checkRowProjectileCollision: (this: Level<Z, P, PR>, row: Row<Cell<Z, P, PR>>) => void;
-  checkProjectilesCollision: (this: Level<Z, P, PR>) => void;
 };
 
 type LevelProps<Z extends ZombieEntity, P extends PlantEntity, PR extends ProjectileEntity> = {
@@ -135,11 +131,14 @@ function removeProjectile<Z extends ZombieEntity, P extends PlantEntity, PR exte
 }
 
 function checkRowProjectileCollision<Z extends ZombieEntity, P extends PlantEntity, PR extends ProjectileEntity>(
-  this: Level<Z, P, PR>,
+  level: Level<Z, P, PR>,
   row: Row<Cell<Z, P, PR>>,
 ) {
   let bZombie = false;
   let bProjectile = false;
+
+  const zombiesToBeRemoved = new Set<Z>();
+  const projectilesToBeRemoved = new Set<PR>();
 
   for (const cell of row) {
     if (cell.zombies.length > 0) {
@@ -158,52 +157,140 @@ function checkRowProjectileCollision<Z extends ZombieEntity, P extends PlantEnti
     for (const cell of row) {
       if (cell.zombies.length > 0 && cell.projectiles.length > 0) {
         for (const projectile of cell.projectiles) {
+          if (projectilesToBeRemoved.has(projectile)) continue;
           for (const zombie of cell.zombies) {
+            if (zombiesToBeRemoved.has(zombie)) continue;
             const projectileX = projectile.getX();
             const zombieX = zombie.getX();
 
             if (projectileX > zombieX) {
-              break;
+              continue;
             }
 
             if (projectileX === zombieX) {
-              zombie.takeDamage(projectile.damage);
-              if (zombie.health <= 0) {
-                this.removeZombie(zombie);
+              zombie.takeDamage(projectile.getDamage());
+              if (zombie.getHealth() <= 0) {
+                zombiesToBeRemoved.add(zombie);
               }
-              this.removeProjectile(projectile);
+              projectilesToBeRemoved.add(projectile);
               break;
             }
 
-            const nextProjectileX = projectile.getX() + projectile.getSpeed();
-            const nextZombieX = zombie.getX() + zombie.getSpeed();
+            const nextProjectileX = projectile.getNextTickX();
+            const nextZombieX = zombie.getNextTickX();
 
-            if (projectile.getX() + projectile.getSpeed() >= zombie.getX()) {
-              zombie.takeDamage(projectile.damage);
-              if (zombie.health <= 0) {
-                this.removeZombie(zombie);
+            if (nextProjectileX >= nextZombieX) {
+              zombie.takeDamage(projectile.getDamage());
+              if (zombie.getHealth() <= 0) {
+                zombiesToBeRemoved.add(zombie);
               }
-              this.removeProjectile(projectile);
+              projectilesToBeRemoved.add(projectile);
             }
           }
         }
       }
     }
   }
+
+  for (const zombie of zombiesToBeRemoved) {
+    level.removeZombie(zombie);
+  }
+
+  for (const projectile of projectilesToBeRemoved) {
+    level.removeProjectile(projectile);
+  }
 }
 
 function checkProjectilesCollision<Z extends ZombieEntity, P extends PlantEntity, PR extends ProjectileEntity>(
-  this: Level<Z, P, PR>,
+  level: Level<Z, P, PR>,
 ) {
-  for (const row of this.grid.cells) {
-    this.checkRowProjectileCollision(row);
+  for (const row of level.grid.rows) {
+    checkRowProjectileCollision(level, row);
+  }
+}
+
+function moveEntities<Z extends ZombieEntity, P extends PlantEntity, PR extends ProjectileEntity>(
+  level: Level<Z, P, PR>,
+) {
+  const zombiesToBeRemoved = new Set<Z>();
+  const projectilesToBeRemoved = new Set<PR>();
+
+  for (const zombie of level.entities.zombies) {
+    const nextX = zombie.getNextTickX();
+    const nextCell = level.grid.getCellByGameCoordinates(nextX, zombie.getY());
+    const cell = level.grid.getCellByGameCoordinates(zombie.getX(), zombie.getY());
+
+    if (!cell) {
+      zombiesToBeRemoved.add(zombie);
+      continue;
+    }
+
+    if (!nextCell) {
+      zombiesToBeRemoved.add(zombie);
+      continue;
+    }
+
+    if (nextCell !== cell) {
+      const index = cell.zombies.indexOf(zombie);
+      if (index > -1) {
+        cell.zombies.splice(index, 1);
+        nextCell.zombies.push(zombie);
+      }
+      continue;
+    }
+
+    const index = cell.zombies.indexOf(zombie);
+    if (index > -1) {
+      cell.zombies.splice(index, 1);
+      nextCell.zombies.push(zombie);
+    }
+  }
+
+  for (const projectile of level.entities.projectiles) {
+    const nextX = projectile.getNextTickX();
+    const nextCell = level.grid.getCellByGameCoordinates(nextX, projectile.getY());
+    const cell = level.grid.getCellByGameCoordinates(projectile.getX(), projectile.getY());
+
+    if (!cell) {
+      projectilesToBeRemoved.add(projectile);
+      continue;
+    }
+
+    if (!nextCell) {
+      projectilesToBeRemoved.add(projectile);
+      continue;
+    }
+
+    if (nextCell !== cell) {
+      const index = cell.projectiles.indexOf(projectile);
+      if (index > -1) {
+        cell.projectiles.splice(index, 1);
+        nextCell.projectiles.push(projectile);
+      }
+      continue;
+    }
+
+    const index = cell.projectiles.indexOf(projectile);
+    if (index > -1) {
+      cell.projectiles.splice(index, 1);
+      nextCell.projectiles.push(projectile);
+    }
+  }
+
+  for (const zombie of zombiesToBeRemoved) {
+    level.removeZombie(zombie);
+  }
+
+  for (const projectile of projectilesToBeRemoved) {
+    level.removeProjectile(projectile);
   }
 }
 
 function performLoop<Z extends ZombieEntity, P extends PlantEntity, PR extends ProjectileEntity>(
   this: Level<Z, P, PR>,
 ) {
-  this.checkProjectilesCollision();
+  checkProjectilesCollision(this);
+  moveEntities(this);
 
   for (const zombie of this.entities.zombies) {
     if (zombie.move) {
@@ -213,9 +300,9 @@ function performLoop<Z extends ZombieEntity, P extends PlantEntity, PR extends P
   }
 
   for (const plant of this.entities.plants) {
-    if (plant.attack) {
-      console.log(`${plant.getName()}:${plant.getId()} attack`);
-    }
+    // if (plant.attack) {
+    console.log(`${plant.getName()}:${plant.getId()} attack`);
+    // }
   }
 
   for (const projectile of this.entities.projectiles) {
@@ -245,8 +332,6 @@ function createLevel<Z extends ZombieEntity, P extends PlantEntity, PR extends P
     removeZombie,
     removePlant,
     removeProjectile,
-    checkRowProjectileCollision,
-    checkProjectilesCollision,
   };
 }
 

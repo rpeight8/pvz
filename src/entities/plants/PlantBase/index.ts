@@ -13,12 +13,10 @@ type PlantBaseProps = BaseProps & {
 };
 
 const createPlantBase = ({ name, health, x, y }: PlantBaseProps): PlantBase => {
-  const base = createBase({ name, x, y });
-
   const plant = {
-    ...takeDamageFeature<Base>({
+    ...createBase({ name, x, y }),
+    ...takeDamageFeature({
       health,
-      entity: base,
     }),
   };
 
