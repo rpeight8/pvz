@@ -1,9 +1,9 @@
-import type { Renderer } from './renderer';
-import type { Base, Base as BaseEntity } from './entities/base';
-import type { Grid, Cell, Row } from './grid';
-import { isMoveable } from './features/move';
-import { isAttackable } from './features/attack';
-import { isDamageable } from './features/takeDamage';
+import type { Renderer } from '../renderer';
+import type { Base, Base as BaseEntity } from '../entities/base';
+import type { Grid, Cell, Row } from '../grid';
+import { isMoveable } from '../features/move';
+import { isAttackable } from '../features/attack';
+import { isDamageable } from '../features/takeDamage';
 
 type Entities<E extends Base> = {
   zombies: E[];
@@ -16,9 +16,10 @@ type Level<E extends Base> = {
   entities: Entities<E>;
   renderer: Renderer<any, BaseEntity>;
   performLoop: (this: Level<E>) => void;
-  addZombie: (this: Level<E>, texture: string, zombie: E, cell: Cell<E>) => void;
-  addPlant: (this: Level<E>, plant: E, cell: Cell<E>) => void;
-  addProjectile: (this: Level<E>, projectile: E, cell: Cell<E>) => void;
+  addEntity: (this: Level<E>, entityType: 'zombies' | 'plants' | 'projectiles', entityProps: AddEntityProps<E>) => void;
+  addZombie: (this: Level<E>, entityProps: AddEntityProps<E>) => void;
+  addPlant: (this: Level<E>, entityProps: AddEntityProps<E>) => void;
+  addProjectile: (this: Level<E>, entityProps: AddEntityProps<E>) => void;
   removeZombie: (this: Level<E>, zombie: E) => void;
   removePlant: (this: Level<E>, plant: E) => void;
   removeProjectile: (this: Level<E>, projectile: E) => void;
@@ -28,31 +29,112 @@ type LevelProps<E extends Base> = {
   grid: Grid<E>;
   renderer: Renderer<any, BaseEntity>;
 };
+enum SPAWN_ALIGNMENT {
+  LEFT = 'LEFT',
+  LEFT_TOP = 'LEFT_TOP',
+  TOP = 'TOP',
+  TOP_RIGHT = 'TOP_RIGHT',
+  RIGHT = 'RIGHT',
+  RIGHT_BOTTOM = 'RIGHT_BOTTOM',
+  BOTTOM = 'BOTTOM',
+  BOTTOM_LEFT = 'BOTTOM_LEFT',
+  CENTER = 'CENTER',
+}
 
-function addZombie<E extends Base>(this: Level<E>, texture: string, zombie: E, cell: Cell<E>) {
-  this.entities.zombies.push(zombie);
-  cell.zombies.push(zombie);
-  const gameX = cell.getGameX();
-  const gameY = cell.getGameY();
+function applyAlignment({
+  alignment,
+  x,
+  y,
+  width,
+  height,
+}: {
+  alignment: SPAWN_ALIGNMENT;
+  x: number;
+  y: number;
+  width: number;
+  height: number;
+}) {
+  switch (alignment) {
+    case SPAWN_ALIGNMENT.LEFT:
+      x -= width;
+      break;
+    case SPAWN_ALIGNMENT.LEFT_TOP:
+      x -= width;
+      y -= height;
+      break;
+    case SPAWN_ALIGNMENT.TOP:
+      y -= height;
+      break;
+    case SPAWN_ALIGNMENT.TOP_RIGHT:
+      x += width;
+      y -= height;
+      break;
+    case SPAWN_ALIGNMENT.RIGHT:
+      x += width;
+      break;
+    case SPAWN_ALIGNMENT.RIGHT_BOTTOM:
+      x += width;
+      y += height;
+      break;
+    case SPAWN_ALIGNMENT.BOTTOM:
+      y += height;
+      break;
+    case SPAWN_ALIGNMENT.BOTTOM_LEFT:
+      x -= width;
+      y += height;
+      break;
+    case SPAWN_ALIGNMENT.CENTER:
+      x -= width / 2;
+      y -= height / 2;
+      break;
+    default:
+      break;
+  }
+  return [x, y];
+}
+
+type AddEntityProps<E> = {
+  texture: string;
+  entity: E;
+  cell: Cell<E>;
+  alignment?: SPAWN_ALIGNMENT;
+};
+
+function addEntity<E extends Base>(
+  this: Level<E>,
+  entityType: 'zombies' | 'plants' | 'projectiles',
+  { texture, entity, cell, alignment = SPAWN_ALIGNMENT.CENTER }: AddEntityProps<E>,
+) {
+  this.entities[entityType].push(entity);
+  cell[entityType].push(entity);
+  const [gameX, gameY] = applyAlignment({
+    alignment,
+    x: cell.getGameX(),
+    y: cell.getGameY(),
+    width: cell.gameWidth,
+    height: cell.gameHeight,
+  });
+
   const [screenX, screenY] = this.grid.gamePositionToScreenPosition(gameX, gameY);
-  zombie.setX(gameX);
-  zombie.setY(gameY);
+
   this.renderer.createSpriteByEntity({
-    entity: zombie,
+    entity,
     texture,
     x: screenX,
     y: screenY,
   });
 }
 
-function addPlant<E extends Base>(this: Level<E>, plant: E, cell: Cell<E>) {
-  this.entities.plants.push(plant);
-  cell.plants.push(plant);
+function addZombie<E extends Base>(this: Level<E>, props: AddEntityProps<E>) {
+  this.addEntity('zombies', props);
 }
 
-function addProjectile<E extends Base>(this: Level<E>, projectile: E, cell: Cell<E>) {
-  this.entities.projectiles.push(projectile);
-  cell.projectiles.push(projectile);
+function addPlant<E extends Base>(this: Level<E>, props: AddEntityProps<E>) {
+  this.addEntity('plants', props);
+}
+
+function addProjectile<E extends Base>(this: Level<E>, props: AddEntityProps<E>) {
+  this.addEntity('projectiles', props);
 }
 
 function removeZombie<E extends Base>(this: Level<E>, zombie: E) {
@@ -254,6 +336,7 @@ function createLevel<E extends Base>({ grid, renderer }: LevelProps<E>): Level<E
     entities,
     renderer,
     performLoop,
+    addEntity,
     addZombie,
     addPlant,
     addProjectile,
@@ -263,5 +346,5 @@ function createLevel<E extends Base>({ grid, renderer }: LevelProps<E>): Level<E
   };
 }
 
-export { createLevel };
+export { createLevel, SPAWN_ALIGNMENT };
 export type { Level, Grid, Entities, Cell, LevelProps };

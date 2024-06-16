@@ -97,8 +97,8 @@ const createGrid = <E>({
   const widthRation = screenWidth / gameWidth;
   const heightRation = screenHeight / gameHeight;
 
-  const rows = Array.from({ length: rowsNumber }, () =>
-    Array.from({ length: columnsNumber }, (_, i: number): Cell<E> => {
+  const rows = Array.from({ length: rowsNumber }, (_, iRow: number) =>
+    Array.from({ length: columnsNumber }, (_, iCell: number): Cell<E> => {
       return {
         zombies: [],
         plants: [],
@@ -107,8 +107,10 @@ const createGrid = <E>({
         gameHeight: cellGameHeight,
         screenWidth: cellScreenWidth,
         screenHeight: cellScreenHeight,
-        gameX: i * cellGameWidth,
-        gameY: i * cellGameHeight,
+        gameX: iCell * cellGameWidth,
+        gameY: iRow * cellGameHeight,
+        x: iCell * cellScreenWidth,
+        y: iRow * cellScreenHeight,
         getGameX() {
           return this.gameX;
         },
@@ -138,5 +140,5 @@ const createGrid = <E>({
   };
 };
 
-export { createGrid };
+export { createGrid, SPAWN_ALIGNMENT };
 export type { Grid, Cell, Row, CreateGridProps };
