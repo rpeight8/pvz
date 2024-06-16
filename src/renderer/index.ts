@@ -1,4 +1,4 @@
-import * as PIXI from 'pixi.js';
+import { Application, Assets, Sprite } from 'pixi.js';
 
 type createSpriteByEntityProps<E> = {
   texture: string;
@@ -28,20 +28,20 @@ type Renderer<S, E> = {
   removeAllSpritesByEntity: (entity: E) => void;
 };
 
-const createPixiRenderer = <E>(app: PIXI.Application): Renderer<PIXI.Sprite, E> => {
+const createPixiRenderer = <E>(app: Application): Renderer<Sprite, E> => {
   const sprites = new Map<
     E,
     {
-      main?: PIXI.Sprite;
-      dependent: Set<PIXI.Sprite>;
+      main?: Sprite;
+      dependent: Set<Sprite>;
     }
   >();
 
-  const createSpriteByEntity = ({ texture, entity, x, y }: createSpriteByEntityProps<E>): PIXI.Sprite => {
-    const sprite = new PIXI.Sprite(PIXI.Assets.get(texture));
+  const createSpriteByEntity = ({ texture, entity, x, y }: createSpriteByEntityProps<E>): Sprite => {
+    const sprite = new Sprite(Assets.get(texture));
     if (!sprites.has(entity)) {
       sprites.set(entity, {
-        main: sprite,
+        main: undefined,
         dependent: new Set(),
       });
     }
@@ -57,7 +57,7 @@ const createPixiRenderer = <E>(app: PIXI.Application): Renderer<PIXI.Sprite, E> 
     return sprite;
   };
 
-  const updateSpritePosition = ({ sprite, x, y }: updateSpritePosition<PIXI.Sprite>): void => {
+  const updateSpritePosition = ({ sprite, x, y }: updateSpritePosition<Sprite>): void => {
     sprite.x = x;
     sprite.y = y;
   };
@@ -70,7 +70,7 @@ const createPixiRenderer = <E>(app: PIXI.Application): Renderer<PIXI.Sprite, E> 
     entitySprites.main.y = y;
   };
 
-  const removeSpriteByEntity = (sprite: PIXI.Sprite, entity: E): void => {
+  const removeSpriteByEntity = (sprite: Sprite, entity: E): void => {
     const entitySprites = sprites.get(entity);
     if (!entitySprites) return;
 

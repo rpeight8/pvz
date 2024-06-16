@@ -84,8 +84,8 @@ function applyAlignment({
       y += height;
       break;
     case SPAWN_ALIGNMENT.CENTER:
-      x -= width / 2;
-      y -= height / 2;
+      x += width / 2;
+      y += height / 2;
       break;
     default:
       break;
@@ -123,6 +123,9 @@ function addEntity<E extends Base>(
     x: screenX,
     y: screenY,
   });
+
+  entity.setX(gameX);
+  entity.setY(gameY);
 }
 
 function addZombie<E extends Base>(this: Level<E>, props: AddEntityProps<E>) {
