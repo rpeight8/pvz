@@ -56,5 +56,10 @@ const shootFeature = <PR extends ProjectileBase>({
   return shootable;
 };
 
+function isShootable<PR extends ProjectileBase>(object: any): object is Shootable<PR> {
+  return 'shoot' in object;
+}
+
 export default shootFeature;
+export { isShootable };
 export type { Shootable, ShootableProps };

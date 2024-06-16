@@ -20,5 +20,10 @@ function takeDamageFeature({ health }: { health: number }): Damageable {
   };
 }
 
+function isDamageable(entity: any): entity is Damageable {
+  return 'takeDamage' in entity;
+}
+
 export default takeDamageFeature;
+export { isDamageable };
 export type { Damageable };

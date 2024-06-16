@@ -1,18 +1,17 @@
-import { Application, Sprite, Assets } from 'pixi.js';
-import { createGrid } from './grid/Grid';
+import { Application, Assets } from 'pixi.js';
+import { createGrid } from './grid';
 import './style.css';
 import { createLevel } from './level';
-import type { RegularZombie } from './entities/zombies/RegularZombie';
-import type { PeashooterPlant } from './entities/plants/PeashooterPlant';
-import type { PeaProjectile } from './entities/projectiles/PeaProjectile';
 import createRegularZombie from './entities/zombies/RegularZombie';
+import type { Base } from './entities/base';
+import createPixiRenderer from './renderer';
 
 const app = new Application();
 
 async function setup() {
   await app.init({ width: 800, height: 600 });
   document.body.appendChild(app.canvas);
-  app.ticker.maxFPS = 1;
+  app.ticker.maxFPS = 60;
 }
 
 async function preload() {
@@ -30,33 +29,41 @@ async function preload() {
   await Assets.load(assets);
 }
 
-const grid = createGrid<RegularZombie, PeashooterPlant<PeaProjectile>, PeaProjectile>({
+const grid = createGrid<Base>({
   rowsNumber: 3,
   columnsNumber: 3,
   screenHeight: 600,
   screenWidth: 800,
-  gameHeight: 1000,
-  gameWidth: 2000,
+  gameHeight: 1000 * 60,
+  gameWidth: 1000 * 800,
 });
 console.log(grid);
 
+const renderer = createPixiRenderer<Base>(app);
 (async () => {
   await preload();
   await setup();
 
-  const level = createLevel({ grid });
+  const level = createLevel({ grid, renderer });
 
-  const peashooterSprite = new Sprite(Assets.get('peashooter'));
-  const regularZombieSprite = new Sprite(Assets.get('regularZombie'));
+  // const peashooterSprite = new Sprite(Assets.get('peashooter'));
+  // const regularZombieSprite = new Sprite(Assets.get('regularZombie'));
 
-  regularZombieSprite.x = 200;
-  regularZombieSprite.y = 100;
+  level.grid.rows[0][level.grid.rows.length - 1];
+  level.addZombie(
+    'regularZombie',
+    createRegularZombie({
+      name: 'Regular Zombie',
+      health: 100,
+      attackSpeed: 1,
+      damage: 10,
+      x: 0,
+      y: 0,
+    }),
+    level.grid.rows[0][level.grid.rows.length - 1],
+  );
 
-  peashooterSprite.x = 100;
-  peashooterSprite.y = 100;
-
-  app.stage.addChild(peashooterSprite);
-  app.stage.addChild(regularZombieSprite);
-
-  app.ticker.add(() => {});
+  app.ticker.add(() => {
+    level.performLoop();
+  });
 })();

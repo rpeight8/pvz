@@ -1,8 +1,4 @@
-type Damageable = {
-  takeDamage: (damage: number) => void;
-  getHealth: () => number;
-  setHealth: (health: number) => void;
-};
+import { Damageable } from '../takeDamage';
 
 type Attackable = {
   attack: (target: Damageable) => void;
@@ -37,4 +33,10 @@ function attackFeature({ damage, attackSpeed }: AttackableProps): Attackable {
   };
 }
 
+function isAttackable(entity: any): entity is Attackable {
+  return 'attack' in entity;
+}
+
 export default attackFeature;
+export { isAttackable };
+export type { Attackable };

@@ -1,21 +1,9 @@
 import takeDamageFeature from '@/features/takeDamage';
-import { createBase } from '@/entities/base/Base';
-import type { BaseProps } from '@/entities/base/Base';
+import type { Damageable } from '@/features/takeDamage';
+import { createBase } from '@/entities/base';
+import type { Base, BaseProps } from '@/entities/base';
 
-type Base = {
-  getId: () => string;
-  getName: () => string;
-  getX: () => number;
-  getY: () => number;
-  setX: (x: number) => void;
-  setY: (y: number) => void;
-};
-
-type ZombieBase = Base & {
-  takeDamage: (damage: number) => void;
-  getHealth: () => number;
-  setHealth: (health: number) => void;
-};
+type ZombieBase = Base & Damageable;
 
 type ZombieBaseProps = BaseProps & {
   health: number;

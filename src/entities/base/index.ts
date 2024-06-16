@@ -1,4 +1,5 @@
 import generateId from '@utils/idGenerator';
+import renderer from '@/renderer';
 
 type Base = {
   id: string;
@@ -25,6 +26,7 @@ const createBase = ({ name, x, y }: BaseProps): Base => {
     name,
     x,
     y,
+    renderer: renderer,
     getX: function () {
       return this.x;
     },

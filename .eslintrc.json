@@ -21,7 +21,9 @@
       "importt/parsers": {
         "@typescript-eslint/parser": [".ts"]
       }
-    },
-    "rules": {}
+    }
+  },
+  "rules": {
+    "@typescript-eslint/no-explicit-any": "off"
   }
 }

@@ -1,12 +1,9 @@
 import takeDamageFeature from '@/features/takeDamage';
-import { createBase } from '@/entities/base/Base';
-import type { Base, BaseProps } from '@/entities/base/Base';
+import type { Damageable } from '@/features/takeDamage';
+import { createBase } from '@/entities/base';
+import type { Base, BaseProps } from '@/entities/base';
 
-type PlantBase = Base & {
-  takeDamage: (damage: number) => void;
-  getHealth: () => number;
-  setHealth: (health: number) => void;
-};
+type PlantBase = Base & Damageable;
 
 type PlantBaseProps = BaseProps & {
   health: number;

@@ -3,20 +3,9 @@ import createPlantBase from '@/entities/plants/PlantBase';
 import createPeaProjectile from '@/entities/projectiles/PeaProjectile';
 import type { PeaProjectile } from '@/entities/projectiles/PeaProjectile';
 import type { ProjectileBase } from '@/entities/projectiles/ProjectileBase';
-import shootFeature from '@/features/shoot';
+import shootFeature, { Shootable } from '@/features/shoot';
 
-type ProjectileBuilder<PR extends ProjectileBase> = ({ damage, x, y }: { damage: number; x: number; y: number }) => PR;
-
-type PeashooterPlant<PR extends ProjectileBase> = PlantBase & {
-  shoot: () => ProjectileBuilder<PR>;
-  getShootRate: () => number;
-  setShootRate: (rate: number) => void;
-  getShootDamage: () => number;
-  setShootDamage: (damage: number) => void;
-  projectile: ProjectileBuilder<PR>;
-  getProjectile: () => ProjectileBuilder<PR>;
-  setProjectile: (projectile: ProjectileBuilder<PR>) => void;
-};
+type PeashooterPlant<PR extends ProjectileBase> = PlantBase & Shootable<PR>;
 
 type PeashooterPlantProps = PlantBaseProps & {
   shootDamage: number;

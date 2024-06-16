@@ -1,3 +1,4 @@
+import attackFeature from '@/features/attack';
 import type { ProjectileBase } from '../ProjectileBase';
 import createProjectileBase from '../ProjectileBase';
 
@@ -17,10 +18,7 @@ const createPeaProjectile = ({ damage, x, y }: PeaProjectileProps): PeaProjectil
 
   const peaProjectile: PeaProjectile = {
     ...baseProjectile,
-    getDamage: () => damage,
-    setDamage: (newDamage: number) => {
-      damage = newDamage;
-    },
+    ...attackFeature({ damage, attackSpeed: 0 }),
   };
   return peaProjectile;
 };
