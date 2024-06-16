@@ -14,7 +14,7 @@ type PeaProjectileProps = {
 };
 
 const createPeaProjectile = ({ damage, x, y }: PeaProjectileProps): PeaProjectile => {
-  const baseProjectile = createProjectileBase({ damage, moveSpeed: 60, x, y, name: 'pea' });
+  const baseProjectile = createProjectileBase({ damage, moveSpeed: 2000, x, y, name: 'pea' });
 
   const peaProjectile: PeaProjectile = {
     ...baseProjectile,

@@ -1,9 +1,10 @@
-import type { ProjectileBase } from '@/entities/projectiles/ProjectileBase';
+import type { ProjectileBase } from '@/entities/common/projectiles/ProjectileBase';
 
-type ProjectileBuilder<PR extends ProjectileBase> = ({ damage, x, y }: { damage: number; x: number; y: number }) => PR;
+type ProjectileBuilder<PR> = ({ damage, x, y }: { damage: number; x: number; y: number }) => PR;
 
-type Shootable<PR extends ProjectileBase> = {
+type Shootable<PR> = {
   shoot: () => PR;
+  updateShooting: (ticks: number) => PR | undefined;
   projectileBuilder: ProjectileBuilder<PR>;
   getProjectile: () => ProjectileBuilder<PR>;
   setProjectile: (projectileBuilder: ProjectileBuilder<PR>) => void;
@@ -37,6 +38,11 @@ const shootFeature = <PR extends ProjectileBase>({
         y: this.getShootY(),
       });
     },
+    updateShooting(ticks: number): PR | undefined {
+      if (ticks === 1 || ticks % shootRate === 0) {
+        return this.shoot();
+      }
+    },
     getShootX,
     getShootY,
     getProjectile: function () {
@@ -56,7 +62,7 @@ const shootFeature = <PR extends ProjectileBase>({
   return shootable;
 };
 
-function isShootable<PR extends ProjectileBase>(object: any): object is Shootable<PR> {
+function isShootable<PR>(object: any): object is Shootable<PR> {
   return 'shoot' in object;
 }
 

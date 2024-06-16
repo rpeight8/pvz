@@ -1,11 +1,11 @@
-import { Application, Assets, Color, Graphics, Sprite } from 'pixi.js';
+import { Application, Assets, Graphics } from 'pixi.js';
 import { createGrid } from './grid';
 import './style.css';
 import { createLevel, SPAWN_ALIGNMENT } from './level';
-import createRegularZombie from './entities/zombies/RegularZombie';
-import type { Base } from './entities/base';
-import createPixiRenderer from './renderer';
-
+import type { Base } from './entities/common/base';
+import createPixiRenderer, { RendererWrapped } from './renderer';
+import createRegularZombieRenderer from './entities/renderer/zombies/RegularZombie';
+import createPeashooterPlantRenderer, { PeashooterPlantRenderer } from './entities/renderer/plants/PeashooterPlant';
 const app = new Application();
 
 async function setup() {
@@ -25,12 +25,16 @@ async function preload() {
       alias: 'regularZombie',
       src: './src/assets/RegularZombie.png',
     },
+    {
+      alias: 'pea',
+      src: './src/assets/Pea.png',
+    },
   ];
 
   await Assets.load(assets);
 }
 
-const grid = createGrid<Base>({
+const grid = createGrid<RendererWrapped<Base>>({
   rowsNumber: 6,
   columnsNumber: 8,
   screenHeight: 600,
@@ -39,7 +43,7 @@ const grid = createGrid<Base>({
   gameWidth: 1000 * 800,
 });
 
-const renderer = createPixiRenderer<Base>(app);
+const renderer = createPixiRenderer<RendererWrapped<Base>>(app);
 (async () => {
   await preload();
   await setup();
@@ -90,8 +94,7 @@ const renderer = createPixiRenderer<Base>(app);
 
   for (let i = 0; i < 1; i++) {
     level.addZombie({
-      texture: 'regularZombie',
-      entity: createRegularZombie({
+      entity: createRegularZombieRenderer({
         name: 'Regular Zombie',
         health: 100,
         attackSpeed: 1,
@@ -103,6 +106,18 @@ const renderer = createPixiRenderer<Base>(app);
       alignment: SPAWN_ALIGNMENT.RIGHT_BOTTOM,
     });
   }
+
+  level.addPlant({
+    entity: createPeashooterPlantRenderer({
+      name: 'Peashooter',
+      health: 100,
+      shootDamage: 10,
+      x: 0,
+      y: 0,
+    }),
+    cell: grid.rows[0][1],
+    alignment: SPAWN_ALIGNMENT.BOTTOM_LEFT,
+  });
 
   // level.addZombie(
   //   'regularZombie',
@@ -116,8 +131,12 @@ const renderer = createPixiRenderer<Base>(app);
   //   }),
   //   level.grid.rows[0][level.grid.rows.length - 1],
   // );
-
+  let fpsCounter = 0;
   app.ticker.add(() => {
-    level.performLoop();
+    level.performLoop(fpsCounter);
+    fpsCounter++;
+    if (fpsCounter === Number.MAX_SAFE_INTEGER) {
+      fpsCounter = 0;
+    }
   });
 })();

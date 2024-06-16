@@ -25,7 +25,8 @@
       "@/*": ["src/*"],
       "@assets/*": ["src/assets/*"],
       "@utils/*": ["src/utils/*"],
-      "@entities/*": ["src/entities/*"]
+      "@entities/*": ["src/entities/*"],
+      "@features/*": ["src/features/*"]
     }
   },
   "include": ["src"]

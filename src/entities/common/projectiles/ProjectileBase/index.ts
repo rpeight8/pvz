@@ -1,5 +1,5 @@
-import { createBase } from '@/entities/base';
-import type { Base, BaseProps } from '@/entities/base';
+import { createBase } from '@/entities/common/base';
+import type { Base, BaseProps } from '@/entities/common/base';
 import moveFeature, { Moveable } from '@/features/move';
 
 type ProjectileBase = Base & Moveable;

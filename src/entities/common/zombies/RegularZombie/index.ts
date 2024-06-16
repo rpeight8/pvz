@@ -1,5 +1,5 @@
-import type { ZombieBase, ZombieBaseProps } from '@/entities/zombies/ZombieBase';
-import createZombieBase from '@/entities/zombies/ZombieBase';
+import type { ZombieBase, ZombieBaseProps } from '@/entities/common/zombies/ZombieBase';
+import createZombieBase from '@/entities/common/zombies/ZombieBase';
 import attackFeature from '@/features/attack';
 import moveFeature, { Direction } from '@/features/move';
 import type { Moveable } from '@/features/move';

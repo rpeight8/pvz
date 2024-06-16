@@ -1,21 +1,22 @@
-import type { Renderer } from '../renderer';
-import type { Base, Base as BaseEntity } from '../entities/base';
+import type { Renderer, RendererAddon } from '../renderer';
+import type { Base } from '@/entities/common/base';
 import type { Grid, Cell, Row } from '../grid';
 import { isMoveable } from '../features/move';
 import { isAttackable } from '../features/attack';
 import { isDamageable } from '../features/takeDamage';
+import { isShootable } from '@/features/shoot';
 
-type Entities<E extends Base> = {
+type Entities<E extends RendererAddon & Base> = {
   zombies: E[];
   plants: E[];
   projectiles: E[];
 };
 
-type Level<E extends Base> = {
+type Level<E extends RendererAddon & Base> = {
   grid: Grid<E>;
   entities: Entities<E>;
-  renderer: Renderer<any, BaseEntity>;
-  performLoop: (this: Level<E>) => void;
+  renderer: Renderer<any, E>;
+  performLoop: (this: Level<E>, count: number) => void;
   addEntity: (this: Level<E>, entityType: 'zombies' | 'plants' | 'projectiles', entityProps: AddEntityProps<E>) => void;
   addZombie: (this: Level<E>, entityProps: AddEntityProps<E>) => void;
   addPlant: (this: Level<E>, entityProps: AddEntityProps<E>) => void;
@@ -25,9 +26,9 @@ type Level<E extends Base> = {
   removeProjectile: (this: Level<E>, projectile: E) => void;
 };
 
-type LevelProps<E extends Base> = {
+type LevelProps<E extends RendererAddon> = {
   grid: Grid<E>;
-  renderer: Renderer<any, BaseEntity>;
+  renderer: Renderer<any, RendererAddon>;
 };
 enum SPAWN_ALIGNMENT {
   LEFT = 'LEFT',
@@ -54,9 +55,9 @@ function applyAlignment({
   width: number;
   height: number;
 }) {
+  return [x, y];
   switch (alignment) {
     case SPAWN_ALIGNMENT.LEFT:
-      x -= width;
       break;
     case SPAWN_ALIGNMENT.LEFT_TOP:
       x -= width;
@@ -94,32 +95,31 @@ function applyAlignment({
 }
 
 type AddEntityProps<E> = {
-  texture: string;
   entity: E;
   cell: Cell<E>;
   alignment?: SPAWN_ALIGNMENT;
 };
 
-function addEntity<E extends Base>(
+function addEntity<E extends RendererAddon & Base>(
   this: Level<E>,
   entityType: 'zombies' | 'plants' | 'projectiles',
-  { texture, entity, cell, alignment = SPAWN_ALIGNMENT.CENTER }: AddEntityProps<E>,
+  { entity, cell, alignment }: AddEntityProps<E>,
 ) {
   this.entities[entityType].push(entity);
   cell[entityType].push(entity);
-  const [gameX, gameY] = applyAlignment({
-    alignment,
-    x: cell.getGameX(),
-    y: cell.getGameY(),
-    width: cell.gameWidth,
-    height: cell.gameHeight,
-  });
+  const [gameX, gameY] = (alignment &&
+    applyAlignment({
+      alignment,
+      x: cell.getGameX(),
+      y: cell.getGameY(),
+      width: cell.gameWidth,
+      height: cell.gameHeight,
+    })) || [cell.getGameX(), cell.getGameY()];
 
   const [screenX, screenY] = this.grid.gamePositionToScreenPosition(gameX, gameY);
 
   this.renderer.createSpriteByEntity({
     entity,
-    texture,
     x: screenX,
     y: screenY,
   });
@@ -128,19 +128,19 @@ function addEntity<E extends Base>(
   entity.setY(gameY);
 }
 
-function addZombie<E extends Base>(this: Level<E>, props: AddEntityProps<E>) {
+function addZombie<E extends RendererAddon & Base>(this: Level<E>, props: AddEntityProps<E>) {
   this.addEntity('zombies', props);
 }
 
-function addPlant<E extends Base>(this: Level<E>, props: AddEntityProps<E>) {
+function addPlant<E extends RendererAddon & Base>(this: Level<E>, props: AddEntityProps<E>) {
   this.addEntity('plants', props);
 }
 
-function addProjectile<E extends Base>(this: Level<E>, props: AddEntityProps<E>) {
+function addProjectile<E extends RendererAddon & Base>(this: Level<E>, props: AddEntityProps<E>) {
   this.addEntity('projectiles', props);
 }
 
-function removeZombie<E extends Base>(this: Level<E>, zombie: E) {
+function removeZombie<E extends RendererAddon & Base>(this: Level<E>, zombie: E) {
   const index = this.entities.zombies.indexOf(zombie);
   if (index > -1) {
     this.entities.zombies.splice(index, 1);
@@ -149,7 +149,7 @@ function removeZombie<E extends Base>(this: Level<E>, zombie: E) {
   }
 }
 
-function removePlant<E extends Base>(this: Level<E>, plant: E) {
+function removePlant<E extends RendererAddon & Base>(this: Level<E>, plant: E) {
   const index = this.entities.plants.indexOf(plant);
   if (index > -1) {
     this.entities.plants.splice(index, 1);
@@ -157,15 +157,16 @@ function removePlant<E extends Base>(this: Level<E>, plant: E) {
   }
 }
 
-function removeProjectile<E extends Base>(this: Level<E>, projectile: E) {
+function removeProjectile<E extends RendererAddon & Base>(this: Level<E>, projectile: E) {
   const index = this.entities.projectiles.indexOf(projectile);
   if (index > -1) {
     this.entities.projectiles.splice(index, 1);
     this.grid.getCellByGameCoordinates(projectile.getX(), projectile.getY()).projectiles.splice(index, 1);
+    this.renderer.removeAllSpritesByEntity(projectile);
   }
 }
 
-function checkRowProjectileCollision<E extends Base>(level: Level<E>, row: Row<Cell<E>>) {
+function checkRowProjectileCollision<E extends RendererAddon & Base>(level: Level<E>, row: Row<Cell<E>>) {
   let bZombie = false;
   let bProjectile = false;
 
@@ -245,13 +246,13 @@ function checkRowProjectileCollision<E extends Base>(level: Level<E>, row: Row<C
   }
 }
 
-function checkProjectilesCollision<E extends Base>(level: Level<E>) {
+function checkProjectilesCollision<E extends RendererAddon & Base>(level: Level<E>) {
   for (const row of level.grid.rows) {
     checkRowProjectileCollision(level, row);
   }
 }
 
-function moveEntity<E extends Base>(
+function moveEntity<E extends RendererAddon & Base>(
   entity: E,
   level: Level<E>,
   entitiesToBeRemoved: Set<E>,
@@ -295,7 +296,7 @@ function moveEntity<E extends Base>(
   });
 }
 
-function moveEntities<E extends Base>(level: Level<E>) {
+function moveEntities<E extends RendererAddon & Base>(level: Level<E>) {
   const zombiesToBeRemoved = new Set<E>();
   const projectilesToBeRemoved = new Set<E>();
 
@@ -316,18 +317,22 @@ function moveEntities<E extends Base>(level: Level<E>) {
   }
 }
 
-function performLoop<E extends Base>(this: Level<E>) {
+function performLoop<E extends RendererAddon & Base>(this: Level<E>, count: number) {
   checkProjectilesCollision(this);
   moveEntities(this);
 
   for (const plant of this.entities.plants) {
-    // if (plant.attack) {
-    console.log(`${plant.getName()}:${plant.getId()} attack`);
-    // }
+    if (!isShootable<E>(plant)) continue;
+    const projectile = plant.updateShooting(count);
+    if (!projectile || !isMoveable(projectile)) continue;
+    this.addProjectile({
+      entity: projectile,
+      cell: this.grid.getCellByGameCoordinates(plant.getX(), plant.getY()),
+    });
   }
 }
 
-function createLevel<E extends Base>({ grid, renderer }: LevelProps<E>): Level<E> {
+function createLevel<E extends RendererAddon & Base>({ grid, renderer }: LevelProps<E>): Level<E> {
   const entities: Entities<E> = {
     zombies: [],
     plants: [],

@@ -1,7 +1,6 @@
 import { Application, Assets, Sprite } from 'pixi.js';
 
 type createSpriteByEntityProps<E> = {
-  texture: string;
   entity: E;
   x: number;
   y: number;
@@ -19,7 +18,7 @@ type updateMainSpritePositionByEntityProps<E> = {
   y: number;
 };
 
-type Renderer<S, E> = {
+type Renderer<S, E extends RendererAddon> = {
   createSpriteByEntity: (props: createSpriteByEntityProps<E>) => S;
   removeSpriteByEntity: (sprite: S, entity: E) => void;
   updateSpritePosition: (props: updateSpritePosition<S>) => void;
@@ -28,7 +27,11 @@ type Renderer<S, E> = {
   removeAllSpritesByEntity: (entity: E) => void;
 };
 
-const createPixiRenderer = <E>(app: Application): Renderer<Sprite, E> => {
+type RendererAddon = {
+  texture: string;
+};
+
+const createPixiRenderer = <E extends RendererAddon>(app: Application): Renderer<Sprite, E> => {
   const sprites = new Map<
     E,
     {
@@ -37,8 +40,8 @@ const createPixiRenderer = <E>(app: Application): Renderer<Sprite, E> => {
     }
   >();
 
-  const createSpriteByEntity = ({ texture, entity, x, y }: createSpriteByEntityProps<E>): Sprite => {
-    const sprite = new Sprite(Assets.get(texture));
+  const createSpriteByEntity = ({ entity, x, y }: createSpriteByEntityProps<E>): Sprite => {
+    const sprite = new Sprite(Assets.get(entity.texture));
     if (!sprites.has(entity)) {
       sprites.set(entity, {
         main: undefined,
@@ -130,4 +133,4 @@ const createPixiRenderer = <E>(app: Application): Renderer<Sprite, E> => {
 };
 
 export default createPixiRenderer;
-export type { Renderer, createSpriteByEntityProps };
+export type { Renderer, createSpriteByEntityProps, RendererAddon };

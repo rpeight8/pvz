@@ -1,7 +1,7 @@
 import takeDamageFeature from '@/features/takeDamage';
 import type { Damageable } from '@/features/takeDamage';
-import { createBase } from '@/entities/base';
-import type { Base, BaseProps } from '@/entities/base';
+import { createBase } from '@/entities/common/base';
+import type { Base, BaseProps } from '@/entities/common/base';
 
 type ZombieBase = Base & Damageable;
 

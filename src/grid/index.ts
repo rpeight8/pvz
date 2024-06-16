@@ -2,12 +2,14 @@ type Cell<E> = {
   zombies: E[];
   plants: E[];
   projectiles: E[];
-  gameWidth: number;
-  gameHeight: number;
-  screenWidth: number;
-  screenHeight: number;
   gameX: number;
   gameY: number;
+  screenX: number;
+  screenY: number;
+  gamwWidth: number;
+  gameHeight: number;
+  screenWidht: number;
+  screenHeight: number;
   getGameX: () => number;
   getGameY: () => number;
 };
@@ -103,14 +105,22 @@ const createGrid = <E>({
         zombies: [],
         plants: [],
         projectiles: [],
-        gameWidth: cellGameWidth,
-        gameHeight: cellGameHeight,
-        screenWidth: cellScreenWidth,
-        screenHeight: cellScreenHeight,
         gameX: iCell * cellGameWidth,
         gameY: iRow * cellGameHeight,
-        x: iCell * cellScreenWidth,
-        y: iRow * cellScreenHeight,
+        screenX: iCell * cellScreenWidth,
+        screenY: iRow * cellScreenHeight,
+        get screenWidht() {
+          return cellScreenWidth;
+        },
+        get screenHeight() {
+          return cellScreenHeight;
+        },
+        get gamwWidth() {
+          return cellGameWidth;
+        },
+        get gameHeight() {
+          return cellGameHeight;
+        },
         getGameX() {
           return this.gameX;
         },
@@ -125,10 +135,18 @@ const createGrid = <E>({
     rows,
     rowsNumber,
     columnsNumber,
-    screenHeight,
-    screenWidth,
-    gameHeight,
-    gameWidth,
+    get screenHeight() {
+      return screenHeight;
+    },
+    get screenWidth() {
+      return screenWidth;
+    },
+    get gameHeight() {
+      return gameHeight;
+    },
+    get gameWidth() {
+      return gameWidth;
+    },
     heightRatio: heightRation,
     widthRatio: widthRation,
     getCellByGameCoordinates,
@@ -140,5 +158,5 @@ const createGrid = <E>({
   };
 };
 
-export { createGrid, SPAWN_ALIGNMENT };
+export { createGrid };
 export type { Grid, Cell, Row, CreateGridProps };
